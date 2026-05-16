@@ -19,7 +19,7 @@ Before starting, ensure you have these installed on your laptop:
 ## 📥 Step 1: Clone the Repository
 Open your terminal, choose where you want the project to live, and pull down the latest code:
 ```bash
-git clone [https://github.com/MuhammadEbad12/ciro_project.git](https://github.com/MuhammadEbad12/ciro_project.git)
+git clone https://github.com/Irfan-code-cloud/ciro_project.git
 cd ciro_project
 ```
 
