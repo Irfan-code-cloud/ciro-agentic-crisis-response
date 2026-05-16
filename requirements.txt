@@ -5,3 +5,6 @@ pydantic
 ortools
 folium
 antigravity
+google-cloud-aiplatform
+google-auth
+python-dotenv
