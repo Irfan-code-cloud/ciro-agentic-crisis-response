@@ -1,4 +1,5 @@
 import json
+import google.auth
 import uvicorn
 import os
 from fastapi import FastAPI
@@ -17,18 +18,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- EXACT AUTHENTICATION FIX ---
+# --- BULLETPROOF HYBRID AUTHENTICATION ---
 try:
-    credentials_path = "vertex-key.json"
-    credentials = service_account.Credentials.from_service_account_file(
-        credentials_path
-    )
-    project_id = credentials.project_id
+    key_path = "vertex-key.json"
 
-    vertexai.init(project=project_id, location="us-central1", credentials=credentials)
-    # Using Gemini 1.5 Flash for faster hackathon response times
+    # Path 1: Irfan's Local Environment (Uses JSON file)
+    if os.path.exists(key_path):
+        print("🔑 Local JSON key found! Authenticating via Service Account...")
+        credentials = service_account.Credentials.from_service_account_file(key_path)
+        project_id = credentials.project_id
+        vertexai.init(
+            project=project_id, location="us-central1", credentials=credentials
+        )
+
+    # Path 2: Adan's Environment (Uses gcloud terminal login)
+    else:
+        print(
+            "🌐 No local key found. Attempting gcloud Application Default Credentials..."
+        )
+        credentials, project_id = google.auth.default()
+        vertexai.init(
+            project=project_id, location="us-central1", credentials=credentials
+        )
+
     model = GenerativeModel("gemini-2.5-flash")
-    print("✅ Vertex AI Initialized successfully with credentials!")
+    print("✅ Vertex AI Initialized successfully!")
 except Exception as e:
     print(f"⚠️ CRITICAL AUTH ERROR: {e}")
     model = None

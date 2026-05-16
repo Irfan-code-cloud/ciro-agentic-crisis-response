@@ -6,21 +6,19 @@ from dotenv import load_dotenv
 
 
 # 1. Load and Verify Credentials
-print("🔍 Loading .env file...")
+print("🔍 Checking Environment Variables...")
 load_dotenv()
 cred_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-print(f"🔑 Credentials Path Found: {cred_path}")
 
-if not cred_path:
-    print(
-        "❌ ERROR: GOOGLE_APPLICATION_CREDENTIALS is empty. The .env file is not being read!"
-    )
+if cred_path:
+    print(f"🔑 Using local Service Account Key: {cred_path}")
+else:
+    print("🌐 No local key found. Defaulting to Google Cloud CLI (ADC) login...")
 
 # 2. Initialize Vertex AI
 print("⚙️ Initializing Vertex AI...")
-# NOTE: If you know your Google Cloud Project ID, you can force it here like this:
-# vertexai.init(project="your-project-id", location="us-central1")
-vertexai.init()
+# Calling init() without arguments tells the SDK to figure it out automatically
+vertexai.init(location="us-central1")
 model = GenerativeModel("gemini-2.5-flash")
 print("✅ Vertex AI Initialized.")
 
