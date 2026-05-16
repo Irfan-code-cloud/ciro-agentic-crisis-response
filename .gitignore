@@ -1,0 +1,78 @@
+# ==========================================
+# 🛑 CRITICAL SECURITY DEFAULTS (DO NOT REMOVE)
+# ==========================================
+.env
+vertex-key.json
+*key.json
+*credentials*.json
+*.pem
+
+# ==========================================
+# 🐍 PYTHON / FASTAPI BACKEND
+# ==========================================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+venv/
+.venv/
+env/
+.env_python/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# ==========================================
+# 🦋 FLUTTER / DART FRONTEND (ciro_frontend)
+# ==========================================
+# Core Flutter generated folders
+**/build/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub-cache/
+**/.pub/
+
+# Android generated
+**/android/key.properties
+**/android/local.properties
+**/android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+**/android/app/build/
+
+# iOS/macOS generated
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/app.flx
+**/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral/
+
+# Windows/Linux generated
+**/windows/flutter/ephemeral/
+**/windows/flutter/generated_plugin_registrant.cc
+**/windows/flutter/generated_plugins.cmake
+**/linux/flutter/ephemeral/
+
+# ==========================================
+# 💻 IDE / OS CONFIGURATIONS
+# ==========================================
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+vertex-key.json
+venv

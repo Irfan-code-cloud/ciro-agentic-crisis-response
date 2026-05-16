@@ -1,0 +1,22 @@
+{
+    "zones": [
+        {
+            "area": "G-10",
+            "congestion_level": "Critical",
+            "avg_speed_kmh": 2,
+            "road_blocks": true
+        },
+        {
+            "area": "Sector E-11",
+            "congestion_level": "Critical",
+            "avg_speed_kmh": 0,
+            "road_blocks": true
+        },
+        {
+            "area": "Blue Area",
+            "congestion_level": "Low",
+            "avg_speed_kmh": 45,
+            "road_blocks": false
+        }
+    ]
+}

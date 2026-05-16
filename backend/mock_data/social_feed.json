@@ -1,0 +1,20 @@
+[
+    {
+        "id": "s1",
+        "source": "X",
+        "timestamp": "2026-05-15T18:30:00Z",
+        "text": "Flash flood happening at E-11 for past 30 mins, stuck in my car!"
+    },
+    {
+        "id": "s2",
+        "source": "Facebook",
+        "timestamp": "2026-05-15T18:35:00Z",
+        "text": "G-10 mein pani bhar gaya hai, gaariyan phans gayi hain. Send help!"
+    },
+    {
+        "id": "s3",
+        "source": "X",
+        "timestamp": "2026-05-15T18:40:00Z",
+        "text": "Clear skies over at Blue Area, traffic moving fine."
+    }
+]
