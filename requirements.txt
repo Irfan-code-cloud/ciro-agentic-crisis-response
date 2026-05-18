@@ -8,3 +8,5 @@ antigravity
 google-cloud-aiplatform
 google-auth
 python-dotenv
+twilio
+python-multipart
