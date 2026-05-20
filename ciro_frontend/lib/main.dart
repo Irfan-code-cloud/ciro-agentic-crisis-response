@@ -1492,7 +1492,7 @@ class _CiroDashboardMobileState extends State<CiroDashboardMobile> {
 
   Future<void> _deleteSingleReport(String id, BuildContext context) async {
     if (id.isEmpty) return;
-    final String deleteBaseUrl = kIsWeb ? 'http://127.0.0.1:8000/api/live-reports' : 'http://10.0.2.2:8000/api/live-reports';
+    final String deleteBaseUrl = 'https://ciro-agentic-crisis-response-295512477034.us-central1.run.app/api/live-reports';
     final String deleteUrl = '$deleteBaseUrl/$id';
     try {
       final response = await http.delete(
@@ -1606,9 +1606,7 @@ class _CiroDashboardMobileState extends State<CiroDashboardMobile> {
                 TextButton(
                   onPressed: isPurgeEnabled
                       ? () async {
-                          final String purgeUrl = kIsWeb 
-                              ? 'http://127.0.0.1:8000/api/live-reports/purge/all' 
-                              : 'http://10.0.2.2:8000/api/live-reports/purge/all';
+                          final String purgeUrl = 'https://ciro-agentic-crisis-response-295512477034.us-central1.run.app/api/live-reports/purge/all';
                           try {
                             final response = await http.delete(
                               Uri.parse(purgeUrl),
@@ -1834,7 +1832,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final String credentials = base64Encode(utf8.encode('$username:$password'));
     final String authHeader = 'Basic $credentials';
-    final String testUrl = kIsWeb ? 'http://127.0.0.1:8000/api/live-reports' : 'http://10.0.2.2:8000/api/live-reports';
+    final String testUrl = 'https://ciro-agentic-crisis-response-295512477034.us-central1.run.app/api/live-reports';
 
     try {
       final response = await http.get(
