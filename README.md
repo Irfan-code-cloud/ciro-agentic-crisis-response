@@ -44,6 +44,26 @@ CIRO features a powerful **"Execute Communication"** module. When a crisis is co
 
 ---
 
+## 📱 Live WhatsApp Agent Testing (For Judges)
+
+To experience the CIRO autonomous intake agent in real-time, you can report a simulated crisis via WhatsApp. 
+
+> 🔒 **Security Note:** To prevent spam and API abuse, our live Twilio testing number and Sandbox code are not public. **Please find the phone number and join code provided directly in our official AI Seekho submission form.**
+
+### How to Test the Agentic Pipeline:
+1. **Initiate the Connection:** Add the provided Twilio number to your phone.
+2. **Join the Sandbox:** Send the exact join code (e.g., `join [word]-[word]`) provided in our submission form to authenticate your number with our Cloud Run backend.
+3. **Report the Crisis:** Once you receive the "You are all set!" confirmation from Twilio, act as a citizen. The AI Intake Agent is fully trained to synthesize unstructured Roman Urdu and English.
+
+**Try sending these exact test signals:**
+* *"e-9 k pass toofan aya hai"*
+* *"F-7 k paass bari aag lagai hai"*
+
+4. **Observe the AI Orchestration:** * **On WhatsApp:** The Intake Agent will immediately process the severity and reply contextually.
+   * **On the CIRO Dashboard:** Open the mobile application and check the **Citizen Complaint Registry**. You will see your exact report instantly parsed, categorized, and synced via Firebase!
+
+---
+
 ## 📊 Data Orchestration & Signal Injection
 CIRO relies on a sophisticated architecture for handling city-wide data:
 * **Signal Injection:** Through the "Inject Signal" interface, we can simulate complex scenarios (e.g., Flash Floods, Highway Pileups). Incoming signals are mapped against our JSON schemas, allowing agents to instantly parse and convert raw alerts into standardized formats required for agentic reasoning.
