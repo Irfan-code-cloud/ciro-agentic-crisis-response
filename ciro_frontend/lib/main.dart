@@ -65,12 +65,11 @@ class _CiroDashboardMobileState extends State<CiroDashboardMobile> {
   // Feature A: WhatsApp Citizen Bot Live Reports
   List<dynamic> _liveReports = [];
   Timer? _pollingTimer;
-  final String liveReportsUrl = kIsWeb ? 'http://127.0.0.1:8000/api/live-reports' : 'http://10.0.2.2:8000/api/live-reports';
-  final String broadcastUrl = kIsWeb ? 'http://127.0.0.1:8000/api/broadcast' : 'http://10.0.2.2:8000/api/broadcast';
+  final String liveReportsUrl = 'https://ciro-agentic-crisis-response-295512477034.us-central1.run.app/api/live-reports';
+  final String broadcastUrl = 'https://ciro-agentic-crisis-response-295512477034.us-central1.run.app/api/broadcast';
 
   // Note: If testing on a physical Android device, replace 10.0.2.2 with your PC's local IP address (e.g., 192.168.1.x).
-  final String backendUrl = kIsWeb ? 'http://127.0.0.1:8000/api/analyze' : 'http://10.0.2.2:8000/api/analyze';
-
+  final String backendUrl = 'https://ciro-agentic-crisis-response-295512477034.us-central1.run.app/api/analyze';
   LatLng? _geocode(String location) {
     final lowerLoc = location.toLowerCase();
     if (lowerLoc.contains('f-8')) return const LatLng(33.7104, 73.0369);
