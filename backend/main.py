@@ -63,9 +63,16 @@ except Exception as e:
 
 # --- FIREBASE FIRESTORE INITIALIZATION ---
 try:
-    cred = fb_credentials.Certificate("firebase-key.json")
-    if not firebase_admin._apps:
-        firebase_admin.initialize_app(cred)
+    # 1. Try local key file first (for testing on your laptop)
+    if os.path.exists("firebase-key.json"):
+        cred = fb_credentials.Certificate("firebase-key.json")
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app(cred)
+    # 2. If no key file, use Cloud Run's automatic credentials
+    else:
+        if not firebase_admin._apps:
+            firebase_admin.initialize_app()
+            
     db = firestore.client()
     print("🔥 Firebase Firestore connected successfully!")
 except Exception as e:
