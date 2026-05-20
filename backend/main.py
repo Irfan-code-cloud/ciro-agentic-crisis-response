@@ -2,8 +2,11 @@ import json
 import google.auth
 import uvicorn
 import os
-from fastapi import FastAPI, Form, Response
+import hashlib
+from fastapi import FastAPI, Form, Response, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import secrets
 import vertexai
 from vertexai.generative_models import GenerativeModel
 from google.oauth2 import service_account
@@ -11,6 +14,8 @@ from twilio.twiml.messaging_response import MessagingResponse
 from backend.agents.citizen_intake_agent import process_citizen_report
 from pydantic import BaseModel
 from typing import List
+import firebase_admin
+from firebase_admin import credentials as fb_credentials, firestore
 
 class CrisisPayload(BaseModel):
     location: str
@@ -56,10 +61,20 @@ except Exception as e:
     print(f"⚠️ CRITICAL AUTH ERROR: {e}")
     model = None
 
+# --- FIREBASE FIRESTORE INITIALIZATION ---
+try:
+    cred = fb_credentials.Certificate("firebase-key.json")
+    if not firebase_admin._apps:
+        firebase_admin.initialize_app(cred)
+    db = firestore.client()
+    print("🔥 Firebase Firestore connected successfully!")
+except Exception as e:
+    print(f"Firebase Init Error: {e}")
+    db = None
+
 # --------------------------------
 
-# Global State
-live_reports = []
+# Global State (live_reports is now persisted on Firestore)
 
 # Geospatial Anchoring Dictionary
 SECTOR_COORDINATES = {
@@ -70,6 +85,25 @@ SECTOR_COORDINATES = {
 }
 
 
+# --- BASIC AUTHENTICATION ---
+security = HTTPBasic()
+
+def verify_cda_officer(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, "CDA_officer")
+    
+    # Secure SHA-256 hash verification (GitHub-safe)
+    expected_password_hash = "309b93da7dcb2c7ccdd266ae681b0c53a7df3280387f2a5621a4a05f79efe617"
+    incoming_hash = hashlib.sha256(credentials.password.encode()).hexdigest()
+    correct_password = secrets.compare_digest(incoming_hash, expected_password_hash)
+    
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
 @app.post("/api/whatsapp-webhook")
 def whatsapp_webhook(Body: str = Form(""), MediaUrl0: str = Form(None)):
     print(f"📲 [WhatsApp Webhook] Received message: {Body}")
@@ -79,22 +113,66 @@ def whatsapp_webhook(Body: str = Form(""), MediaUrl0: str = Form(None)):
     # Process through the Intake Agent
     analysis = process_citizen_report(message_text=Body, media_url=MediaUrl0)
     
-    # Store globally for Flutter UI to fetch later
-    live_reports.append(analysis)
+    # Store globally for Flutter UI to fetch later (using Firestore)
+    if db is not None:
+        try:
+            db.collection("live_reports").add(analysis)
+        except Exception as e:
+            print(f"Firestore Add Error: {e}")
+    else:
+        print("⚠️ Firestore not initialized, report not saved.")
     
     resp = MessagingResponse()
     resp.message(analysis.get("citizen_reply", "We have received your report."))
     return Response(content=str(resp), media_type="application/xml")
 
-@app.get("/api/live-reports")
+@app.get("/api/live-reports", dependencies=[Depends(verify_cda_officer)])
 def get_live_reports():
-    return {"reports": live_reports}
+    if db is not None:
+        try:
+            reports_list = []
+            for doc in db.collection("live_reports").stream():
+                report = doc.to_dict()
+                report["id"] = doc.id
+                if "lat" not in report or "lng" not in report:
+                    report["lat"] = 33.6938
+                    report["lng"] = 73.0053
+                reports_list.append(report)
+            return reports_list
+        except Exception as e:
+            print(f"Firestore Get Error: {e}")
+            return []
+    return []
+
+@app.delete("/api/live-reports/{doc_id}", dependencies=[Depends(verify_cda_officer)])
+def delete_live_report(doc_id: str):
+    if db is not None:
+        try:
+            db.collection("live_reports").document(doc_id).delete()
+            return {"status": "success", "message": "Report deleted"}
+        except Exception as e:
+            print(f"Firestore Delete Error: {e}")
+            return {"status": "error", "message": str(e)}
+    return {"status": "error", "message": "Database not initialized"}
+
+@app.delete("/api/live-reports/purge/all", dependencies=[Depends(verify_cda_officer)])
+def purge_all_live_reports():
+    if db is not None:
+        try:
+            docs = db.collection("live_reports").stream()
+            for doc in docs:
+                doc.reference.delete()
+            return {"status": "success", "message": "Database purged"}
+        except Exception as e:
+            print(f"Firestore Purge Error: {e}")
+            return {"status": "error", "message": str(e)}
+    return {"status": "error", "message": "Database not initialized"}
 
 @app.get("/api/status")
 def get_status():
     return {"status": "OPERATIONAL", "message": "Backend is live."}
 
-@app.post("/api/broadcast")
+@app.post("/api/broadcast", dependencies=[Depends(verify_cda_officer)])
 def execute_communications(payload: CrisisPayload):
     print(f"📡 [Broadcast Agent] Drafting communications for {payload.crisis_type} at {payload.location}")
     if not model:
@@ -115,6 +193,7 @@ def execute_communications(payload: CrisisPayload):
     - NEVER use literal, robotic, or word-for-word translations from English. Use authoritative and urgent phrasing suitable for public safety announcements.
     - TRANSLITERATE ALL LOCATIONS: You MUST convert English sector names into Urdu script (e.g., 'F-8' MUST be written as 'ایف-8', 'G-10' MUST be 'جی-10', 'E-11' MUST be 'ای-11', 'Kashmir Highway' MUST be 'کشمیر ہائی وے').
     - Do NOT include any English alphabet characters in the Urdu fields.
+    - CRITICAL: Do not include raw latitude or longitude numbers in the broadcast messages. Use descriptive location names (e.g., 'Srinagar Highway', 'F-8 Markaz') so the alerts are easily understood by the public.
     
     Tasks:
     1. twitter_post: An official, urgent X/Twitter update with relevant hashtags following the Urdu rules above.
@@ -151,7 +230,7 @@ def execute_communications(payload: CrisisPayload):
         }
 
 
-@app.get("/api/analyze")
+@app.get("/api/analyze", dependencies=[Depends(verify_cda_officer)])
 def run_ai_analysis(signal: str = None, lang: str = "en"):
     # The simulated noisy social media post from the user, or the dynamically injected signal
     tweet = (
@@ -242,6 +321,8 @@ def run_ai_analysis(signal: str = None, lang: str = "en"):
     CRITICAL: The `resource_kpis` array (both `label` and `reasoning`) MUST ALWAYS remain in English, regardless of the requested language, to ensure rapid processing.
     
     The `current_impacts` and `recommended_actions` MUST be strictly flat JSON arrays of short, clean strings (e.g., ["Deploy fire trucks", "Block Kashmir Highway"]). Absolutely NO markdown, NO bullet points, and NO numbering inside the array items.
+    CRITICAL: One of your `recommended_actions` MUST explicitly explain the Active Reroute strategy. You must mention the detour path you generated and explain WHY it is necessary based on the traffic and weather context (e.g., 'Diverting traffic via Kashmir Highway to bypass 0km/h deadlock').
+    CRITICAL: Never output raw latitude and longitude coordinates in your text responses. Always translate coordinates into human-readable locations, street names, or prominent landmarks based on the context provided.
     
     You MUST return ONLY a valid JSON object strictly formatted like this:
     {{
@@ -277,7 +358,7 @@ def run_ai_analysis(signal: str = None, lang: str = "en"):
                 "High risk of electrical hazards",
             ],
             "recommended_actions": [
-                "Reroute traffic to Kashmir Highway",
+                f"Active Reroute: Diverting traffic via Kashmir Highway to bypass the deadlock at {location}.",
                 f"Dispatch high-clearance rescue teams to {location}",
                 "Broadcast public safety alert",
             ],

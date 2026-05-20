@@ -30,14 +30,17 @@ Your Tasks:
 2. Identify the crisis type (e.g., Fire, Flood, Accident, Pileup, Power Outage).
 3. Assess the severity (High, Medium, Low).
 4. Detect the citizen's language (English, Roman Urdu, or Urdu script).
-5. Generate a short, reassuring response in the EXACT same language/script the citizen used. Tell them their report is logged and help/CDA teams are being notified.
-6. Generate a concise English summary of the crisis for the tactical dashboard.
+5. Estimate the approximate numerical latitude and longitude for the location in Islamabad (e.g., E-11 is approx lat: 33.698, lng: 72.977). If unknown, default to lat: 33.6844, lng: 73.0479.
+6. Generate a short, reassuring response in the EXACT same language/script the citizen used. Tell them their report is logged and help/CDA teams are being notified.
+7. Generate a concise English summary of the crisis for the tactical dashboard.
 
 Output ONLY a valid JSON object matching this schema exactly (no markdown blocks, no backticks, just raw JSON text):
 {
   "location": "Extracted location",
   "crisis_type": "Crisis type",
   "severity": "High/Medium/Low",
+  "lat": 33.698,
+  "lng": 72.977,
   "citizen_reply": "Comforting reply in citizen's original language",
   "translated_summary": "English summary"
 }
@@ -69,6 +72,8 @@ Output ONLY a valid JSON object matching this schema exactly (no markdown blocks
             "location": "Unknown",
             "crisis_type": "General Emergency",
             "severity": "Medium",
+            "lat": 33.6844,
+            "lng": 73.0479,
             "citizen_reply": "Message received. The CDA is investigating the situation. / پیغام موصول ہو گیا ہے۔ سی ڈی اے صورتحال کا جائزہ لے رہا ہے۔",
             "translated_summary": f"Fallback summary: {message_text[:100]}",
         }
