@@ -10,3 +10,4 @@ google-auth
 python-dotenv
 twilio
 python-multipart
+firebase-admin
