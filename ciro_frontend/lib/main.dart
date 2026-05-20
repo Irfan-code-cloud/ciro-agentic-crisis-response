@@ -1163,41 +1163,76 @@ class _CiroDashboardMobileState extends State<CiroDashboardMobile> {
                                     }
                                   }
 
-                                  return Row(
-                                    children: [
-                                      Expanded(
-                                        child: _buildKpiCard(
+                                  // Responsive Layout Check
+                                  if (isDesktop) {
+                                    // Laptop/Web View: Side-by-side Row
+                                    return Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildKpiCard(
+                                            title: 'Fire Units',
+                                            icon: Icons.fire_truck,
+                                            value: fireKpi,
+                                            color: Colors.redAccent,
+                                            reasoning: fireReasoning,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: _buildKpiCard(
+                                            title: 'Ambulances',
+                                            icon: Icons.medical_services,
+                                            value: ambKpi,
+                                            color: Colors.blueAccent,
+                                            reasoning: ambReasoning,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: _buildKpiCard(
+                                            title: 'Police',
+                                            icon: Icons.local_police,
+                                            value: polKpi,
+                                            color: Colors.amber,
+                                            reasoning: polReasoning,
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  } else {
+                                    // Mobile View: Stacked Column
+                                    return Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        _buildKpiCard(
                                           title: 'Fire Units',
                                           icon: Icons.fire_truck,
                                           value: fireKpi,
                                           color: Colors.redAccent,
                                           reasoning: fireReasoning,
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: _buildKpiCard(
+                                        const SizedBox(height: 12),
+                                        _buildKpiCard(
                                           title: 'Ambulances',
                                           icon: Icons.medical_services,
                                           value: ambKpi,
                                           color: Colors.blueAccent,
                                           reasoning: ambReasoning,
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: _buildKpiCard(
+                                        const SizedBox(height: 12),
+                                        _buildKpiCard(
                                           title: 'Police',
                                           icon: Icons.local_police,
                                           value: polKpi,
                                           color: Colors.amber,
                                           reasoning: polReasoning,
                                         ),
-                                      ),
-                                    ],
-                                  );
-                                }
-                              ),
+                                      ],
+                                    );
+                                  }
+                                } // This closes the builder function
+                              ), // This closes the Builder widget
+
                               const SizedBox(height: 12),
                               SizedBox(
                                 width: double.infinity,
@@ -1276,7 +1311,7 @@ class _CiroDashboardMobileState extends State<CiroDashboardMobile> {
       onTap: () => _showKpiReasoningDialog(context, title, reasoning),
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
         decoration: BoxDecoration(
           color: const Color(0xFF151C26),
           borderRadius: BorderRadius.circular(12),
@@ -1289,14 +1324,30 @@ class _CiroDashboardMobileState extends State<CiroDashboardMobile> {
             )
           ],
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        child: Stack(
+          alignment: Alignment.center,
           children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(height: 8),
-            Text(title, style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 4),
-            Text(value, style: GoogleFonts.poppins(color: color, fontSize: 14, fontWeight: FontWeight.w600), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+            // The Main Centered Content
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color, size: 24),
+                const SizedBox(height: 8),
+                Text(title, style: GoogleFonts.poppins(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w600), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 4),
+                Text(value, style: GoogleFonts.poppins(color: color, fontSize: 14, fontWeight: FontWeight.w600), textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ],
+            ),
+            // The Subtle Tap Icon in the Top Right
+            const Positioned(
+              top: 0,
+              right: 0,
+              child: Icon(
+                Icons.touch_app, // A universal "tap here" hand icon
+                color: Colors.white30, // Kept dim so it doesn't distract from the main data
+                size: 18,
+              ),
+            ),
           ],
         ),
       ),
