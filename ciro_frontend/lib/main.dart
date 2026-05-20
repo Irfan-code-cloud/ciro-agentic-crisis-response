@@ -1862,6 +1862,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   Future<void> _login() async {
     final String username = _usernameController.text.trim();
@@ -1988,12 +1989,26 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
-                obscureText: true,
+                obscureText: _obscurePassword,
                 style: GoogleFonts.poppins(color: Colors.white),
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: GoogleFonts.poppins(color: Colors.white70, fontWeight: FontWeight.w300),
                   prefixIcon: const Icon(Icons.lock_outline, color: Colors.amber),
+
+                  // <-- NEW: The Eye Icon Button -->
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.white54,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+
                   filled: true,
                   fillColor: const Color(0xFF151C26),
                   enabledBorder: OutlineInputBorder(
