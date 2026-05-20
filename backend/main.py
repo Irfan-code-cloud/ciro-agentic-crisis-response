@@ -16,6 +16,11 @@ from pydantic import BaseModel
 from typing import List
 import firebase_admin
 from firebase_admin import credentials as fb_credentials, firestore
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from the .env file
+load_dotenv()
 
 class CrisisPayload(BaseModel):
     location: str
@@ -98,10 +103,17 @@ security = HTTPBasic()
 def verify_cda_officer(credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = secrets.compare_digest(credentials.username, "CDA_officer")
     
-    # Secure SHA-256 hash verification (GitHub-safe)
-    expected_password_hash = "309b93da7dcb2c7ccdd266ae681b0c53a7df3280387f2a5621a4a05f79efe617"
-    incoming_hash = hashlib.sha256(credentials.password.encode()).hexdigest()
-    correct_password = secrets.compare_digest(incoming_hash, expected_password_hash)
+    # Securely fetch the expected password directly from the environment
+    expected_password = os.getenv("COMMAND_CENTER_PASSWORD")
+    
+    # Failsafe: If the environment variable isn't set, deny access
+    if not expected_password:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Server configuration error: Missing security credentials.",
+        )
+        
+    correct_password = secrets.compare_digest(credentials.password, expected_password)
     
     if not (correct_username and correct_password):
         raise HTTPException(
