@@ -27,7 +27,11 @@ class CrisisPayload(BaseModel):
     crisis_type: str
     recommended_actions: List[str]
 
-app = FastAPI(title="CIRO Backend")
+app = FastAPI(
+    title="CIRO Backend",
+    docs_url=None,
+    redoc_url=None   
+)
 
 app.add_middleware(
     CORSMiddleware,
